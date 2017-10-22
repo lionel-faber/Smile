@@ -4,10 +4,10 @@
     <item
         android:drawable="@color/colorAccent"/>
 
-    <item>
-        <bitmap
-            android:gravity="center"
-            android:src="@drawable/smilesmall"/>
-    </item>
+    <item
+        android:drawable="@drawable/smile"
+        android:height="165dp"
+        android:width="300dp"
+        android:gravity="center"/>
 
 </layer-list>

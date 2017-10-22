@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "1056667244830",
+    "firebase_url": "https://smile-aff5a.firebaseio.com",
+    "project_id": "smile-aff5a",
+    "storage_bucket": "smile-aff5a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1056667244830:android:e08100f36086632f",
+        "android_client_info": {
+          "package_name": "me.lionelfaber.jsontest"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1056667244830-ts0e4qr3gfsmp1cghmksdo0vt22qs8a2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCtqcTxfP-8yi_Q30a4uY7SvtUexIOvooU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

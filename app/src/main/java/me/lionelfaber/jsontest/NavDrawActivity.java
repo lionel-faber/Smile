@@ -3,6 +3,7 @@ package me.lionelfaber.jsontest;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -52,8 +53,8 @@ public class NavDrawActivity extends AppCompatActivity
 //        showpDialog();
 
         db  = new DatabaseHandler(this);
-        url1 = "http://192.168.43.231:8000/get/subs/6";
-        url2 = "http://192.168.43.231:8000/get/infos/6";
+        url1 = "http://192.168.1.6:8000/get/subs/6";
+        url2 = "http://192.168.1.6:8000/get/infos/6";
 
 
         makeJsonArrayRequest1();
@@ -281,6 +282,10 @@ public class NavDrawActivity extends AppCompatActivity
         } else if (id == R.id.placement) {
 
         } else if (id == R.id.contact) {
+
+            Intent intent = new Intent (Intent.ACTION_VIEW , Uri.parse("mailto:" + "14itsjit@gmail.com"));
+            intent.putExtra(Intent.EXTRA_SUBJECT, "Report from SMILE App");
+            startActivity(intent);
 
         }
 
