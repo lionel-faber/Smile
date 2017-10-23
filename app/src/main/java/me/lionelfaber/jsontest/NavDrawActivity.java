@@ -1,15 +1,24 @@
 package me.lionelfaber.jsontest;
 
+import android.app.Dialog;
+import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
+import android.text.InputType;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -19,7 +28,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Response;
@@ -27,17 +38,25 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.bumptech.glide.Glide;
+import com.firebase.ui.auth.AuthUI;
+import com.firebase.ui.auth.ErrorCodes;
+import com.firebase.ui.auth.IdpResponse;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Arrays;
+
 public class NavDrawActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    ProgressDialog pDialog;
     String url1, url2;
     DatabaseHandler db;
+    private static final int RC_SIGN_IN = 1704;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,28 +64,43 @@ public class NavDrawActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nav_draw);
 
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("MyPref",0);
+        String semester = sharedPreferences.getString("semester",null);
 
-//        pDialog = new ProgressDialog(this);
-//        pDialog.setMessage("Syncing database");
-//        pDialog.setCancelable(false);
-//
-//        showpDialog();
+        if (auth.getCurrentUser() != null && semester != null) {
+            // already signed in
 
-        db  = new DatabaseHandler(this);
-        url1 = "http://192.168.1.6:8000/get/subs/6";
-        url2 = "http://192.168.1.6:8000/get/infos/6";
-
-
-        makeJsonArrayRequest1();
-        makeJsonArrayRequest2();
+            db  = new DatabaseHandler(this);
+            url1 = "http://192.168.43.231:8000/get/subs/6";
+            url2 = "http://192.168.43.231:8000/get/infos/6";
 
 
-//        hidepDialog();
+            makeJsonArrayRequest1();
+            makeJsonArrayRequest2();
 
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.your_placeholder, new SubjectFragment());
-        ft.commit();
-        this.setActionBarTitle("Subjects");
+
+
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.replace(R.id.your_placeholder, new SubjectFragment());
+            ft.commit();
+            this.setActionBarTitle("Subjects");
+        } else {
+            // not signed in
+            startActivityForResult(
+                    // Get an instance of AuthUI based on the default app
+                    AuthUI.getInstance()
+                            .createSignInIntentBuilder()
+                            .setIsSmartLockEnabled(false)
+                            .setLogo(R.drawable.smile)
+                            .setAvailableProviders(
+                                    Arrays.asList(new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
+                                            new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()))
+                            .build(),
+                    RC_SIGN_IN);
+
+        }
+
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -82,6 +116,58 @@ public class NavDrawActivity extends AppCompatActivity
         ImageView smile = (ImageView)header.findViewById(R.id.imageView);
         Glide.with(this).load(R.drawable.smile).into(smile);
         navigationView.setNavigationItemSelectedListener(this);
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        // RC_SIGN_IN is the request code you passed into startActivityForResult(...) when starting the sign in flow.
+        if (requestCode == RC_SIGN_IN) {
+            IdpResponse response = IdpResponse.fromResultIntent(data);
+
+            // Successfully signed in
+            if (resultCode == RESULT_OK) {
+                showDialog();
+                return;
+            } else {
+                // Sign in failed
+                if (response == null) {
+                    // User pressed back button
+                    showSnackbar("Action Cancelled");
+                    return;
+                }
+
+                if (response.getErrorCode() == ErrorCodes.NO_NETWORK) {
+                    showSnackbar("No Internet Connection");
+                    return;
+                }
+
+                if (response.getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
+                    showSnackbar("Error! Try Again");
+                    return;
+                }
+            }
+
+            showSnackbar("Unknown Response");
+        }
+    }
+
+    private boolean showDialog() {
+        FragmentManager manager = getFragmentManager();
+        DialogActivity dialogActivity;
+        dialogActivity = new DialogActivity();
+        dialogActivity.show(manager, "DialogActivity");
+        return true;
+    }
+
+
+    public void showSnackbar(String message)
+    {
+       CoordinatorLayout rootlayout = (CoordinatorLayout)findViewById(R.id.coordinator);
+        Snackbar snackbar = Snackbar.make(rootlayout , message, Snackbar.LENGTH_SHORT);
+        View sbView = snackbar.getView();
+        TextView textView = (TextView) sbView.findViewById(android.support.design.R.id.snackbar_text);
+        textView.setTextColor(Color.YELLOW);
+        snackbar.show();
     }
 
     private void makeJsonArrayRequest1(){
@@ -289,8 +375,28 @@ public class NavDrawActivity extends AppCompatActivity
 
         }
 
+        else if (id == R.id.signout) {
+
+            SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", 0);
+            SharedPreferences.Editor editor =  pref.edit();
+            editor.putString("semester", null);
+            editor.apply();
+
+            AuthUI.getInstance()
+                    .signOut(this)
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        public void onComplete(@NonNull Task<Void> task) {
+                            // user is now signed out
+                            startActivity(new Intent(NavDrawActivity.this, NavDrawActivity.class));
+                            finish();
+                        }
+                    });
+        }
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 }
+
+
