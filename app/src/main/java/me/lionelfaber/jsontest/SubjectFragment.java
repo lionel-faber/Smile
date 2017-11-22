@@ -1,9 +1,12 @@
 package me.lionelfaber.jsontest;
 
+import android.app.FragmentManager;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -13,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 
@@ -28,6 +32,7 @@ public class SubjectFragment extends Fragment {
     private RecyclerView recyclerView;
     private SubjectAdapter adapter;
     private List<Subject> subjectList;
+    String semester;
 
 
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
@@ -50,11 +55,54 @@ public class SubjectFragment extends Fragment {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(adapter);
 
-        prepareSubjects();
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MyPref",0);
+        semester = sharedPreferences.getString("semester",null);
+        if(semester.equals("6"))
+            prepareSubjects6();
+        else
+            prepareSubjects4();
 
     }
 
-    private void prepareSubjects() {
+    private void prepareSubjects4() {
+        int[] covers = new int[]{
+                R.drawable.os,
+                R.drawable.daa,
+                R.drawable.se,
+                R.drawable.micro,
+                R.drawable.pqt,
+                R.drawable.micro,
+                R.drawable.os,
+                R.drawable.se};
+
+        Subject a = new Subject("Operating Systems", "CS6401", covers[0]);
+        subjectList.add(a);
+
+        a = new Subject("Design and Algo Analysis", "CS6402", covers[1]);
+        subjectList.add(a);
+
+        a = new Subject("Software Engineering", "CS6403", covers[2]);
+        subjectList.add(a);
+
+        a = new Subject("Microprocessor & Microcontrollers", "EC6504", covers[3]);
+        subjectList.add(a);
+
+        a = new Subject("Probability and Queuing theory ", "MA6453", covers[4]);
+        subjectList.add(a);
+
+        a = new Subject("MPMC Laboratory", "IT6411", covers[5]);
+        subjectList.add(a);
+
+        a = new Subject("Operating Systems Lab", "IT6412", covers[6]);
+        subjectList.add(a);
+
+        a = new Subject("Software Engineering Lab", "IT6413", covers[7]);
+        subjectList.add(a);
+
+        adapter.notifyDataSetChanged();
+    }
+
+    private void prepareSubjects6() {
         int[] covers = new int[]{
                 R.drawable.art,
                 R.drawable.compiler,

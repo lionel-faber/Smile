@@ -54,7 +54,7 @@ import java.util.Arrays;
 public class NavDrawActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    String url1, url2;
+    String url1, url2, semester;
     DatabaseHandler db;
     private static final int RC_SIGN_IN = 1704;
 
@@ -66,14 +66,14 @@ public class NavDrawActivity extends AppCompatActivity
 
         FirebaseAuth auth = FirebaseAuth.getInstance();
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("MyPref",0);
-        String semester = sharedPreferences.getString("semester",null);
+        semester = sharedPreferences.getString("semester",null);
 
         if (auth.getCurrentUser() != null && semester != null) {
             // already signed in
 
             db  = new DatabaseHandler(this);
-            url1 = "http://192.168.43.231:8000/get/subs/6";
-            url2 = "http://192.168.43.231:8000/get/infos/6";
+            url1 = "http://smileit.pythonanywhere.com/get/subs/" + semester;
+            url2 = "http://smileit.pythonanywhere.com/get/infos/" + semester;
 
 
             makeJsonArrayRequest1();
@@ -87,17 +87,8 @@ public class NavDrawActivity extends AppCompatActivity
             this.setActionBarTitle("Subjects");
         } else {
             // not signed in
-            startActivityForResult(
-                    // Get an instance of AuthUI based on the default app
-                    AuthUI.getInstance()
-                            .createSignInIntentBuilder()
-                            .setIsSmartLockEnabled(false)
-                            .setLogo(R.drawable.smile)
-                            .setAvailableProviders(
-                                    Arrays.asList(new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
-                                            new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()))
-                            .build(),
-                    RC_SIGN_IN);
+            startLogin();
+
 
         }
 
@@ -159,6 +150,20 @@ public class NavDrawActivity extends AppCompatActivity
         return true;
     }
 
+    public void startLogin()
+    {
+        startActivityForResult(
+                // Get an instance of AuthUI based on the default app
+                AuthUI.getInstance()
+                        .createSignInIntentBuilder()
+                        .setIsSmartLockEnabled(false)
+                        .setLogo(R.drawable.smile)
+                        .setAvailableProviders(
+                                Arrays.asList(new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
+                                        new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()))
+                        .build(),
+                RC_SIGN_IN);
+    }
 
     public void showSnackbar(String message)
     {
@@ -313,27 +318,6 @@ public class NavDrawActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.nav_draw, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     public void setActionBarTitle(String title){
         Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
@@ -344,53 +328,67 @@ public class NavDrawActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
-        int id = item.getItemId();
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 
-
-        if (id == R.id.nav_subjects) {
-            // Handle the camera action
-            ft.replace(R.id.your_placeholder, new SubjectFragment());
-            ft.addToBackStack(null);
-            ft.commit();
-        } else if (id == R.id.nav_info) {
-            ft.replace(R.id.your_placeholder, new InformationFragment());
-            ft.addToBackStack(null);
-            ft.commit();
-
-        } else if (id == R.id.schedule) {
-
-            ft.replace(R.id.your_placeholder, new ScheduleFragment());
-            ft.addToBackStack(null);
-            ft.commit();
-
-
-        } else if (id == R.id.placement) {
-
-        } else if (id == R.id.contact) {
-
-            Intent intent = new Intent (Intent.ACTION_VIEW , Uri.parse("mailto:" + "14itsjit@gmail.com"));
-            intent.putExtra(Intent.EXTRA_SUBJECT, "Report from SMILE App");
-            startActivity(intent);
-
+        if(semester == null)
+        {
+            Toast.makeText(getApplicationContext(), "You must login first!", Toast.LENGTH_LONG).show();
+            FragmentManager manager = getFragmentManager();
+            DialogActivity dialogActivity;
+            dialogActivity = new DialogActivity();
+            dialogActivity.show(manager, "DialogActivity");
         }
+        else {
 
-        else if (id == R.id.signout) {
+            int id = item.getItemId();
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 
-            SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", 0);
-            SharedPreferences.Editor editor =  pref.edit();
-            editor.putString("semester", null);
-            editor.apply();
 
-            AuthUI.getInstance()
-                    .signOut(this)
-                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                        public void onComplete(@NonNull Task<Void> task) {
-                            // user is now signed out
-                            startActivity(new Intent(NavDrawActivity.this, NavDrawActivity.class));
-                            finish();
-                        }
-                    });
+            if (id == R.id.nav_subjects) {
+                // Handle the camera action
+                ft.replace(R.id.your_placeholder, new SubjectFragment());
+                ft.addToBackStack(null);
+                ft.commit();
+            } else if (id == R.id.nav_info) {
+                ft.replace(R.id.your_placeholder, new InformationFragment());
+                ft.addToBackStack(null);
+                ft.commit();
+
+            } else if (id == R.id.schedule) {
+
+                ft.replace(R.id.your_placeholder, new ScheduleFragment());
+                ft.addToBackStack(null);
+                ft.commit();
+
+
+            } else if (id == R.id.placement) {
+
+                ft.replace(R.id.your_placeholder, new PlacementFragment());
+                ft.addToBackStack(null);
+                ft.commit();
+
+            } else if (id == R.id.contact) {
+
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("mailto:" + "14itsjit@gmail.com"));
+                intent.putExtra(Intent.EXTRA_SUBJECT, "Report from SMILE App");
+                startActivity(intent);
+
+            } else if (id == R.id.signout) {
+
+                SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", 0);
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putString("semester", null);
+                editor.apply();
+
+                AuthUI.getInstance()
+                        .signOut(this)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            public void onComplete(@NonNull Task<Void> task) {
+                                // user is now signed out
+                                startActivity(new Intent(NavDrawActivity.this, NavDrawActivity.class));
+                                finish();
+                            }
+                        });
+            }
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
