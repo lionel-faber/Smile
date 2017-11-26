@@ -367,7 +367,6 @@ public class NavDrawActivity extends AppCompatActivity
                 ft.commit();
 
             } else if (id == R.id.contact) {
-
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("mailto:" + "14itsjit@gmail.com"));
                 intent.putExtra(Intent.EXTRA_SUBJECT, "Report from SMILE App");
                 startActivity(intent);
