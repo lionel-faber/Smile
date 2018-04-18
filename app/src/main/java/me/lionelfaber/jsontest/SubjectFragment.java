@@ -71,9 +71,9 @@ public class SubjectFragment extends Fragment {
                 R.drawable.se,
                 R.drawable.micro,
                 R.drawable.pqt,
-                R.drawable.micro,
-                R.drawable.os,
-                R.drawable.se};
+                R.drawable.microlab,
+                R.drawable.oslab,
+                R.drawable.selab};
 
         Subject a = new Subject("Operating Systems", "CS6401", covers[0]);
         subjectList.add(a);

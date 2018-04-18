@@ -127,6 +127,9 @@ public class ScheduleFragment extends Fragment implements OnDateSelectedListener
         public void onViewCreated(View view, Bundle savedInstanceState) {
 
 
+            ((NavDrawActivity) getActivity()).setActionBarTitle("Schedule");
+
+
             ArrayList<String> dayStrings = db.getAllEvents();
 
             ArrayList<CalendarDay> days = new ArrayList<>();

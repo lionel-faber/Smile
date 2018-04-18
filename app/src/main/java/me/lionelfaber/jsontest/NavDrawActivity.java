@@ -44,6 +44,7 @@ import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -72,19 +73,40 @@ public class NavDrawActivity extends AppCompatActivity
             // already signed in
 
             db  = new DatabaseHandler(this);
-            url1 = "http://smileit.pythonanywhere.com/get/subs/" + semester;
-            url2 = "http://smileit.pythonanywhere.com/get/infos/" + semester;
+            url1 = "http://smileit.pythonanywhere.com/api/get/subs/" + semester;
+            url2 = "http://smileit.pythonanywhere.com/api/get/infos/" + semester;
 
 
             makeJsonArrayRequest1();
             makeJsonArrayRequest2();
 
 
-
+            String b = getIntent().getStringExtra("fragment");
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-            ft.replace(R.id.your_placeholder, new SubjectFragment());
+            if(b != null) {
+                int target = Integer.parseInt(b);
+                switch (target) {
+                    case 1:
+                        ft.replace(R.id.your_placeholder, new InformationFragment());
+                        break;
+                    case 2:
+                        ft.replace(R.id.your_placeholder, new ScheduleFragment());
+                        break;
+                    case 3:
+                        ft.replace(R.id.your_placeholder, new PlacementFragment());
+                        break;
+                    default:
+                        ft.replace(R.id.your_placeholder, new SubjectFragment());
+                        this.setActionBarTitle("Subjects");
+                        break;
+                }
+            }
+            else
+            {
+                ft.replace(R.id.your_placeholder, new SubjectFragment());
+                this.setActionBarTitle("Subjects");
+            }
             ft.commit();
-            this.setActionBarTitle("Subjects");
         } else {
             // not signed in
             startLogin();
@@ -374,9 +396,11 @@ public class NavDrawActivity extends AppCompatActivity
             } else if (id == R.id.signout) {
 
                 SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", 0);
+                String s = pref.getString("semester",null);
                 SharedPreferences.Editor editor = pref.edit();
                 editor.putString("semester", null);
                 editor.apply();
+                FirebaseMessaging.getInstance().unsubscribeFromTopic("semester" + s);
 
                 AuthUI.getInstance()
                         .signOut(this)

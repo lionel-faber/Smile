@@ -17,6 +17,8 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.google.firebase.messaging.FirebaseMessaging;
+
 /**
  * Created by lionel on 23/10/17.
  */
@@ -51,6 +53,7 @@ public class DialogActivity extends android.app.DialogFragment {
                         SharedPreferences.Editor editor = pref.edit();
                         editor.putString("semester", spinner.getSelectedItem().toString());
                         editor.apply();
+                        FirebaseMessaging.getInstance().subscribeToTopic("semester"+spinner.getSelectedItem().toString());
                         startActivity(new Intent(getActivity(), NavDrawActivity.class));
                     }
                     else {
